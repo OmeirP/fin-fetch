@@ -3,8 +3,10 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"github.com/joho/godotenv"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -23,6 +25,11 @@ type Position struct {
 
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	
 	apiKeyId := os.Getenv("T212_KEY_ID")
     apiKeySecret := os.Getenv("T212_KEY_SECRET")
 
@@ -30,19 +37,19 @@ func main() {
 
 
 	credentials := apiKeyId + ":" + apiKeySecret
-	encoded_cred := base64.StdEncoding.EncodeToString([]byte(credentials))
+	encodedCred := base64.StdEncoding.EncodeToString([]byte(credentials))
 
-	auth_header := "Basic " + encoded_cred
+	authHeader := "Basic " + encodedCred
 
 	// Prepare request in memory. http.Get instead would instantly send req without letting change header
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
+		log.Fatal(err)
 		os.Exit(1)	// 1 is normally handled error
 	}
 
 
-	req.Header.Set("Authorization", auth_header)
+	req.Header.Set("Authorization", authHeader)
 
 	client := &http.Client{
 		Timeout: 15 * time.Second,
@@ -51,8 +58,18 @@ func main() {
 	// Send request
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error: %v\n", err)	// maybe replace with logging
+		log.Fatal(err)
 		os.Exit(1)
 	}
 	defer resp.Body.Close()	 // release socket when surrounding func (main) is finished. If body not fully read, connection is closed and not returned to pool.
+
+
+	// resp.Body is a readCloser so can use ReadAll
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	body_str
+
 }
