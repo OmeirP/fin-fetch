@@ -1,12 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 // typed data template
@@ -42,4 +43,16 @@ func main() {
 
 
 	req.Header.Set("Authorization", "Basic " + encoded_cred)
+
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+	}
+
+	// Send request
+	resp, err := client.Do(req)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: %v\n", err)	// maybe replace with logging
+		os.Exit(1)
+	}
+	defer resp.Body.Close()	 // release socket when surrounding func (main) is finished. If body not fully read, connection is closed and not returned to pool.
 }
