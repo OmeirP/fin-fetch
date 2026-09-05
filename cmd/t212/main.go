@@ -42,7 +42,7 @@ func main() {
 	}
 
 
-	req.Header.Set("Authorization", "Basic " + encoded_cred)
+	req.Header.Set("Authorization", auth_header)
 
 	client := &http.Client{
 		Timeout: 15 * time.Second,
