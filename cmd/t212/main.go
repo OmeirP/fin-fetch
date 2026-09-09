@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
+	"encoding/csv\"
 	"github.com/joho/godotenv"
 	"fmt"
 	"io"
@@ -19,7 +20,7 @@ type Position struct {
 	Ticker string
 	Quantity float64
 	CurrentPrice float64
-	PPL float64
+	PPL float64	// Price Profit/Loss	its a slash not a divide
 
 }
 
@@ -65,11 +66,24 @@ func main() {
 
 
 	// resp.Body is a readCloser so can use ReadAll
-	bodyBytes, err := io.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)	// bodyBytes is json-encoded bytes
+	if err != nil {
+		log.Fatal(err)
+	}
+	
+
+	// an array of the above defined position structs
+	var positions []Position
+
+	// parses response into the position slices. Each slice is an instance of the struct. The values get placed into the appropriate fields automatically.
+	err = json.Unmarshal(bodyBytes, &positions)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	body_str
 
+	// iterate through the range of positions. Use _ if you don't need the index
+	for _, pos := range positions {
+		fmt.Println(pos)
+	}
 }
