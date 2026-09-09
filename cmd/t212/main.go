@@ -26,6 +26,11 @@ type Position struct {
 }
 
 
+const (
+	csvName = "portfolio_data.csv"
+)
+
+
 func main() {
 	err := godotenv.Load()
 	if err != nil {
@@ -87,4 +92,28 @@ func main() {
 	for _, pos := range positions {
 		fmt.Println(pos)
 	}
+
+
+	// CSV
+
+	// if the file doesn't exist, create it, otherwise append.  order of flags doesn't matter.
+	// Append puts write cursor at end, create just checks if it exists and creates if not - does nothing if so.
+	f, err := os.OpenFile("trade_log.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, )	// O_WRONLY is required by POSIX, open requests must declare intent.
+	if err != nil {
+		log.Fatal(err)	// This is if there's an error opening the file.
+	}
+	defer f.Close()
+
+
+	if _, err := f.Write([]byte("appended some data\n")); err != nil {
+		log.Fatal(err)
+	}
+
+
+}
+
+
+
+func updateCSV(currentPositions []Position) {
+	now := time.Now()
 }
