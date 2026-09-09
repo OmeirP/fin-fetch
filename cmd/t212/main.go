@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/base64"
 	"encoding/json"
-	"encoding/csv\"
+	"encoding/csv"
 	"github.com/joho/godotenv"
 	"fmt"
 	"io"
@@ -19,6 +19,7 @@ type Position struct {
 	// field names here don't need the matching tags since case insensitive matching is used by default
 	Ticker string
 	Quantity float64
+	AveragePrice float64
 	CurrentPrice float64
 	PPL float64	// Price Profit/Loss	its a slash not a divide
 
