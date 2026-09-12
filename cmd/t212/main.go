@@ -144,7 +144,7 @@ func updateCSV(currentPositions []Position) {
 	for _, p := range currentPositions {
 		currValue := p.CurrentPrice * p.Quantity
 		row := []string{
-			todayStr,
+			currDateStr,
 			p.Ticker,
 			fmt.Sprintf("%.8f", p.Quantity),
 			fmt.Sprintf("%.2f", p.AveragePrice),
