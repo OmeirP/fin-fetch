@@ -88,6 +88,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := updateCSV(positions); err != nil {
+		log.Fatalf("Failed to update CSV: %v", err) // %v is for plain string error. Gets rid of type and context.
+	}
+
 }
 
 
