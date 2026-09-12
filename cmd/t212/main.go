@@ -163,6 +163,8 @@ func updateCSV(currentPositions []Position) error {
 		return fmt.Errorf("Couldn't create temp file: %w", err)
 	}
 
+	// writer.Write doesn't write straight to ssd. Data is written to page cache in memory
+	// writer.WriteAll calls writer.Write and then writer.Flush, which pushes that data from Go memory to OS ram cache
 	writer := csv.NewWriter(tmpFile)
 	if err := writer.WriteAll(preservedRows); err != nil {
 		tmpFile.Close()
@@ -170,5 +172,19 @@ func updateCSV(currentPositions []Position) error {
 		return fmt.Errorf("Failed to write records: %w", err)
 	}
 
+
+	// Write from OS ram cache to permanent storage
+	if err := tmpFile.Sync(); err != nil {
+		tmpFile.Close()
+		os.Remove(tmpFileName)
+		return fmt.Errorf("Failed to temp file to disk: %w", err)
+	}
+
+	if err := os.Rename(tmpFileName, csvName); err != nil {
+		// On non-unix platforms, rename isn't atomic. Don't delete temp file here in case the original is already gone.
+		return fmt.Errorf("Failed to replace original csv (%s is preserved for recovery): %w", tmpFileName, err)
+	}
+
+	return nil;
 
 }
