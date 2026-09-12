@@ -107,7 +107,6 @@ func updateCSV(currentPositions []Position) error {
 
 	// Create preserved rows and then write the headings at the top.
 	preservedRows := [][]string{headers}	// 2d slice but its basically a 2d array	
-	preservedRows = append(preservedRows, headers)
 	
 	
 	// Read existing csv and get rid of old records if necessary
@@ -183,6 +182,7 @@ func updateCSV(currentPositions []Position) error {
 		os.Remove(tmpFileName)
 		return fmt.Errorf("Failed to temp file to disk: %w", err)
 	}
+	tmpFile.Close()
 
 	if err := os.Rename(tmpFileName, csvName); err != nil {
 		// On non-unix platforms, rename isn't atomic. Don't delete temp file here in case the original is already gone.
