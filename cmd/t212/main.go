@@ -92,7 +92,7 @@ func main() {
 
 
 
-func updateCSV(currentPositions []Position) {
+func updateCSV(currentPositions []Position) error {
 	now := time.Now()
 	currDateStr := now.Format(dateFormat)
 	cutoff := now.AddDate(-10, 0, 0)		// Making cutoff date 10 years ago.
@@ -160,13 +160,15 @@ func updateCSV(currentPositions []Position) {
 	tmpFileName := csvName + ".tmp"
 	tmpFile, err := os.Create(tmpFileName)
 	if err != nil {
-		log.Fatal("Couldn't create temp file:", err)
+		return fmt.Errorf("Couldn't create temp file: %w", err)
 	}
 
 	writer := csv.NewWriter(tmpFile)
 	if err := writer.WriteAll(preservedRows); err != nil {
 		tmpFile.Close()
 		os.Remove(tmpFileName)	// Remove the file on error
-		log.Fatal("Failed to write records:")
+		return fmt.Errorf("Failed to write records: %w", err)
 	}
+
+
 }
