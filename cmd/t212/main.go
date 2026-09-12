@@ -187,5 +187,8 @@ func updateCSV(currentPositions []Position) {
 	}
 
 	writer := csv.NewWriter(tmpFile)
-	if 
+	if err := writer.WriteAll(preservedRows); err != nil {
+		tmpFile.Close()
+		os.Remove(tmpFileName)	// Remove the file on error
+	}
 }
