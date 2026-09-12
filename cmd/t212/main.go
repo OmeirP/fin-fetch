@@ -116,4 +116,48 @@ func main() {
 
 func updateCSV(currentPositions []Position) {
 	now := time.Now()
+	cutoff := now.AddDate(-2, 0, 0)		// Making cutoff date 2 years ago.
+
+	headers := []string{"SnapshotDate", "Ticker", "Quantity", "AveragePrice", "CurrentPrice", "PPL"}
+
+
+
+	// Create preserved rows and then write the headings at the top.
+	preservedRows := [][]string{headers}	// 2d slice but its basically a 2d array	
+	preservedRows = append(preservedRows, headers)
+	
+	
+	// Read existing csv and get rid of old records if necessary
+	// done with this scope because file doesn't need to be read or exist for the program. If it fails, it should just move on and create a new one.
+	// also doesn't need to be used after this is done.
+	if file, err := os.Open(csvName); err == nil {
+		reader := csv.NewReader(file)
+
+		// read/move past header
+		_. _ = reader.Read()
+
+		for {	// empty for is basically a while true
+			record, err := reader.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil || len(record) < 1 {
+				continue
+			}
+
+		
+		}
+	}
+
+	reader :=
+
+	// Create new temp file and update that one first. Replace the actual file when writing is complete in case of crash.
+	tmpFileName := csvName + ".tmp"
+	tmpFile, err := os.Create(tmpFileName)
+	if err != nil {
+		log.Fatal("Couldn't create temp file:", err)
+	}
+
+	writer := csv.NewWriter(tmpFile)
+	if 
 }
