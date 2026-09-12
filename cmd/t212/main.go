@@ -28,6 +28,7 @@ type Position struct {
 
 const (
 	csvName = "portfolio_data.csv"
+	dateFormat = "02/01/06"
 )
 
 
@@ -116,7 +117,8 @@ func main() {
 
 func updateCSV(currentPositions []Position) {
 	now := time.Now()
-	cutoff := now.AddDate(-2, 0, 0)		// Making cutoff date 2 years ago.
+	currDateStr := now.Format(dateFormat)
+	cutoff := now.AddDate(-10, 0, 0)		// Making cutoff date 10 years ago.
 
 	headers := []string{"SnapshotDate", "Ticker", "Quantity", "AveragePrice", "CurrentPrice", "PPL"}
 
@@ -138,18 +140,44 @@ func updateCSV(currentPositions []Position) {
 
 		for {	// empty for is basically a while true
 			record, err := reader.Read()
+
 			if err == io.EOF {
 				break
 			}
+
 			if err != nil || len(record) < 1 {
 				continue
 			}
 
-		
+			rowDate, err := time.Parse(dateFormat, record[0])
+			if err != nil {
+				continue  // skip if something wrong with rows.
+			}
+
+			// raw record as string checked instead of parsing date to avoid needing to truncate time from now value
+			if (rowDate.After(cutoff) || rowDate.Equal(cutoff)) && record[0] != currDateStr {
+				preservedRows = append(preservedRows, record)
+			}
 		}
+		file.Close()
 	}
 
-	reader :=
+
+	// Now append currently fetched snapshot
+	for _, p := range currentPositions {
+		currValue := p.CurrentPrice * p.Quantity
+		row := []string{
+			todayStr,
+			p.Ticker,
+			fmt.Sprintf("%.8f", p.Quantity),
+			fmt.Sprintf("%.2f", p.AveragePrice),
+			fmt.Sprintf("%.2f", p.CurrentPrice),
+			fmt.Sprintf("%.2f", currValue),
+			fmt.Sprintf("%.2f", p.PPL),
+		}
+		preservedRows = append(preservedRows, row)
+	}
+
 
 	// Create new temp file and update that one first. Replace the actual file when writing is complete in case of crash.
 	tmpFileName := csvName + ".tmp"
