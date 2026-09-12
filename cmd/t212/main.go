@@ -67,7 +67,6 @@ func main() {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
-		os.Exit(1)
 	}
 	defer resp.Body.Close()	 // release socket when surrounding func (main) is finished. If body not fully read, connection is closed and not returned to pool.
 
@@ -87,29 +86,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-
-	// iterate through the range of positions. Use _ if you don't need the index
-	for _, pos := range positions {
-		fmt.Println(pos)
-	}
-
-
-	// CSV
-
-	// if the file doesn't exist, create it, otherwise append.  order of flags doesn't matter.
-	// Append puts write cursor at end, create just checks if it exists and creates if not - does nothing if so.
-	f, err := os.OpenFile("trade_log.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, )	// O_WRONLY is required by POSIX, open requests must declare intent.
-	if err != nil {
-		log.Fatal(err)	// This is if there's an error opening the file.
-	}
-	defer f.Close()
-
-
-	if _, err := f.Write([]byte("appended some data\n")); err != nil {
-		log.Fatal(err)
-	}
-
 
 }
 
@@ -190,5 +166,6 @@ func updateCSV(currentPositions []Position) {
 	if err := writer.WriteAll(preservedRows); err != nil {
 		tmpFile.Close()
 		os.Remove(tmpFileName)	// Remove the file on error
+		log.Fatal("Failed to write records:")
 	}
 }
