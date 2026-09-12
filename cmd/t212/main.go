@@ -41,6 +41,8 @@ func main() {
 	apiKeyId := os.Getenv("T212_KEY_ID")
     apiKeySecret := os.Getenv("T212_KEY_SECRET")
 
+	// This one isn't listed in the api doc anymore
+	// May need to switch to positions. Some values will need to be manually calculated if so.
 	url := "https://live.trading212.com/api/v0/equity/portfolio"
 
 
