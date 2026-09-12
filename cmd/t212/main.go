@@ -2,15 +2,16 @@ package main
 
 import (
 	"encoding/base64"
-	"encoding/json"
 	"encoding/csv"
-	"github.com/joho/godotenv"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
+	"github.com/joho/godotenv"
 )
 
 // typed data template
@@ -21,7 +22,10 @@ type Position struct {
 	Quantity float64
 	AveragePrice float64
 	CurrentPrice float64
+	TotalInvested float64
+	CurrentValue float64
 	PPL float64	// Price Profit/Loss	its a slash not a divide
+	FxPPL float64
 
 }
 
@@ -103,7 +107,7 @@ func updateCSV(currentPositions []Position) error {
 	currDateStr := now.Format(dateFormat)
 	cutoff := now.AddDate(-10, 0, 0)		// Making cutoff date 10 years ago.
 
-	headers := []string{"SnapshotDate", "Ticker", "Quantity", "AveragePrice", "CurrentPrice", "PPL"}
+	headers := []string{"SnapshotDate", "Ticker", "Quantity", "AveragePrice", "CurrentPrice", "TotalInvested", "CurrentValue", "PPL", "fxPPL"}
 
 
 
@@ -148,14 +152,17 @@ func updateCSV(currentPositions []Position) error {
 	// Now append currently fetched snapshot
 	for _, p := range currentPositions {
 		currValue := p.CurrentPrice * p.Quantity
+		totalInvest := p.AveragePrice * p.Quantity
 		row := []string{
 			currDateStr,
-			p.Ticker,
+			cleanTicker(p.Ticker),
 			fmt.Sprintf("%.8f", p.Quantity),
 			fmt.Sprintf("%.2f", p.AveragePrice),
 			fmt.Sprintf("%.2f", p.CurrentPrice),
+			fmt.Sprintf("%.2f", totalInvest),
 			fmt.Sprintf("%.2f", currValue),
 			fmt.Sprintf("%.2f", p.PPL),
+			fmt.Sprintf("%.2f", p.FxPPL),
 		}
 		preservedRows = append(preservedRows, row)
 	}
@@ -193,4 +200,21 @@ func updateCSV(currentPositions []Position) error {
 
 	return nil;
 
+}
+
+
+// Remove the extra long stuff from the ticker.
+func cleanTicker(raw string) string {
+
+	// remove _EQ first
+	tckr := strings.TrimSuffix(raw, "_EQ")
+
+	// remove country suffixes like _US
+	// if _ wasn't in string, i would be -1
+	if i := strings.Index(tckr, "_"); i != -1 {
+		tckr = tckr[:i]
+	}
+
+	// get rid of trailing lowercase letters like l in VUAGl
+	return strings.TrimRight(tckr, "abcdefghiklmnopqrstuvwxyz")
 }
