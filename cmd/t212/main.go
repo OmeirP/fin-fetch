@@ -74,6 +74,7 @@ func main() {
 	// resp.Body is a readCloser so can use ReadAll
 	bodyBytes, err := io.ReadAll(resp.Body)	// bodyBytes is json-encoded bytes
 	if err != nil {
+		resp.Body.Close()	// Must close here because log.Fatal bypasses defers
 		log.Fatal(err)
 	}
 	
@@ -112,7 +113,7 @@ func updateCSV(currentPositions []Position) {
 		reader := csv.NewReader(file)
 
 		// read/move past header
-		_. _ = reader.Read()
+		_, _ = reader.Read()
 
 		for {	// empty for is basically a while true
 			record, err := reader.Read()
